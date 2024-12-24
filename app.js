@@ -1,31 +1,30 @@
 import createError from 'http-errors';
 import express from 'express';
-import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
-
-import indexRouter from './routes/index.js';
-import guestRouter from './routes/guests.js';
-import adminRouter from './routes/admins.js';
+import dotenv from 'dotenv';
+import userRouter from './routes/users.js';
+import workspaceRouter from './routes/workspaces.js';
+import testRouter from './routes/tests.js'
 
 const app = express();
-const allowedOrigins = ["http://localhost:5173"]
 
+dotenv.config();
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors({
-  origin: allowedOrigins,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  origin: ["http://localhost:5173"],
+  methods: ['get', 'post', 'put', 'delete'],
   credentials: true
 }));
 app.options('*', cors());
 
-app.use('/', indexRouter);
-app.use('/guest', guestRouter);
-app.use('/admin', adminRouter);
+app.use('/user', userRouter);
+app.use('/workspace', workspaceRouter);
+app.use('/test', testRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
