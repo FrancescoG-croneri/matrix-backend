@@ -5,153 +5,171 @@ import db from "../db.js";
 const repository = new UsersRepository(db);
 
 const UsersController = {
+
   Create: async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
     const role = req.body.role;
 
     if (!email || !password || !role || email.trim() === '' || password.trim() === '') {
-      return res.status(400).json({ message: 'Password, Email or Role are missing' });
+      return res.status(400).json({ message: 'Password, Email or Role are missing', success: false });
     }
 
     if (!email.includes('croner')) {
-      return res.status(400).json({ message: 'You should be joining only if you are part of the right organisation' });
+      return res.status(400).json({ message: 'You should be joining only if you are part of the right organisation', success: false });
     }
 
     if (!email.includes('@') || !email.includes('.')) {
-      return res.status(400).json({ message: 'Email invalid' });
+      return res.status(400).json({ message: 'Email invalid', success: false });
     }
 
     const alreadyExistingUser = await repository.findOne(email);
 
     if (alreadyExistingUser.length !== 0) {
-      return res.status(403).json({ message: 'This user already exists' });
+      return res.status(403).json({ message: 'This user already exists', success: false });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await repository.create(email, hashedPassword, role);
+    const response = await repository.create(email, hashedPassword, role);
     
-    if (user === 1) {
-      return res.status(404).json({ message: 'Something went wrong with your credentials' });
+    if (!response) {
+      return res.status(404).json({ message: 'Something went wrong during the user\'s creation', success: false });
     } else {
-      const data = {
-        token: TokenHandler.generateToken(user[0].user_id),
-        user_id: user[0].user_id,
-        email: user[0].email,
-        role: user[0].role,
-        workspaces: user[0].workspaces,
-        created_at: user[0].created_at,
-        updated_at: user[0].updated_at,
-      }
-      return res.status(201).json({ message: 'User created successfully', data });
+      const user = response[0];
+      const token = TokenHandler.generateToken(user.user_id);
+
+      delete user.id;
+      delete user.password;
+      return res.status(201).json({ message: 'User created successfully', user, token, success: true });
     }
   },
 
-  FindOne: async (req, res) => {
-    const email = req.body.email;
-
-    if (!email) return res.status(400).json({ message: 'Missing email' });
-
-    const user = await repository.findOne(email);
-
-    if (user === 1 || !user.length) {
-      return res.status(404).json({ message: 'Failed to find user' });
-    } else {
-      const data = {
-        token: TokenHandler.generateToken(user[0].user_id),
-        user_id: user[0].user_id,
-        email: user[0].email,
-        role: user[0].role,
-        workspaces: user[0].workspaces,
-        created_at: user[0].created_at,
-        updated_at: user[0].updated_at,
-      } 
-      return res.status(200).json({ message: "User found successfully", data });
-    }
-  },
-
-  FindAll: async (req, res) => {
-    const users = await repository.findAll();
-
-    if (users === 1) {
-      return res.status(404).json({ message: 'Failed to find users' });
-    } else {
-      const modifiedUsers = users.map((user) => {
-        delete user.id;
-        delete user.password;
-      });
-      const token = TokenHandler.generateToken(users);
-      return res.status(200).json({ message: "Users fetched correctly", users: modifiedUsers, token });
-    }
-  },
-  
   Authenticate: async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
     if (!email || !password || email.trim() === '' || password.trim() === '') {
-      return res.status(400).json({ message: 'Email, Password or Role are missing' });
+      return res.status(400).json({ message: 'Email, Password are missing', success: false });
     }
 
-    const user = await repository.findOne(email);
+    const response = await repository.findOne(email);
     
-    if (user === 1 || !user.length) {
-      res.status(404).json({ message: 'Failed to find user' });
-    } else if (!(await bcrypt.compare(password, user[0].password))) {
-      return res.status(401).json({ message: 'Passwords do not match' });
+    if (!response) {
+      res.status(404).json({ message: 'Failed to find user', success: false });
+    } else if (!(await bcrypt.compare(password, response[0].password))) {
+      return res.status(401).json({ message: 'Passwords do not match', success: false });
     } else {
-      const data = {
-       token: TokenHandler.generateToken(user[0].user_id),
-       user_id: user[0].user_id,
-       email: user[0].email,
-       role: user[0].role,
-       workspaces: user[0].workspaces,
-       created_at: user[0].created_at,
-       updated_at: user[0].updated_at
-      }
-      return res.status(201).json({ message: "Authentication successful", data});
+      const user = response[0];
+      const token = TokenHandler.generateToken(user.user_id);
+
+      delete user.id;
+      delete user.password;
+      return res.status(201).json({ message: "Authentication successful", user, token, success: true });
+    }
+  },
+
+  FindOneByEmail: async (req, res) => {
+    const requester_id = req.query.requester_id;
+    const email = req.query.email;
+
+    if (!email || !requester_id) return res.status(400).json({ message: 'Missing email', success: false });
+
+    const response = await repository.findOneByEmail(email);
+
+    if (!response) {
+      return res.status(404).json({ message: 'Failed to find user', success: false });
+    } else {
+      const user = response[0];
+      const token = TokenHandler.generateToken(requester_id);
+
+      delete user.id;
+      delete user.password;
+      return res.status(200).json({ message: "User found successfully", user, token, success: true });
+    }
+  },
+
+  FindOneById: async (req, res) => {
+    const requester_id = req.query.requester_id;
+    const user_id = req.query.user_id;
+
+    if (!user_id || !requester_id) return res.status(400).json({ message: 'Missing user_id', success: false });
+
+    const response = await repository.findOneById(user_id);
+
+    if (!response) {
+      return res.status(404).json({ message: 'Failed to find user', success: false });
+    } else {
+      const user = response[0];
+      const token = TokenHandler.generateToken(requester_id);
+
+      delete user.id;
+      delete user.password;
+      return res.status(200).json({ message: "User found successfully", user, token, success: true });
+    }
+  },
+
+  FindAll: async (req, res) => {
+    const requester_id = req.query.requester_id;
+
+    if (!requester_id) {
+      return res.status(400).json({ message: 'requester_id is missing', success: false });
+    }
+
+    const response = await repository.findAll();
+
+    if (!response) {
+      return res.status(404).json({ message: 'Failed to find users', success: false });
+    } else {
+      const modifiedUsers = response.map((user) => {
+        delete user.id;
+        delete user.password;
+      });
+      const token = TokenHandler.generateToken(requester_id);
+
+      return res.status(200).json({ message: "Users fetched correctly", users: modifiedUsers, token, success: true });
     }
   },
 
   Update: async (req, res) => {
-    const email = req.body.email.trim();
-    const password = req.body.password.trim();
+    const requester_id = req.body.requester_id;
+    const email = req.body.email;
+    const password = req.body.password;
     const role = req.body.role;
-    const user_id = req.body.user_id;
-    const workspaces = req.body.workspaces;
 
-    if (!user_id) {
-      return res.status(400).json({ message: 'user_id is missing' });
+    if (!requester_id) {
+      return res.status(400).json({ message: 'requester_id is missing', success: false });
     }
 
-    const user = await repository.update(user_id, email, password, role, workspaces);
+    const response = await repository.update(user_id, email, password, role);
 
-    if (response === 1) {
-      return res.status(404).json({ message: "Failed to update user" });
+    if (!response) {
+      return res.status(404).json({ message: "Failed to update user", success: false });
     } else {
-      const data = {
-        token: TokenHandler.generateToken(user[0].user_id),
-        user_id: user[0].user_id,
-        email: user[0].email,
-        role: user[0].role,
-        workspaces: user[0].workspaces,
-        created_at: user[0].created_at,
-        updated_at: user[0].updated_at
-      }
-      return res.status(200).json({ message: "User updated successfully", data });
+      const user = response[0];
+      const token = TokenHandler.generateToken(user_id);
+
+      delete user.id;
+      delete user.password;
+      return res.status(200).json({ message: "User updated successfully", user, token, success: true });
     }
   },
 
   Delete: async (req, res) => {
-    const user_id = req.body.user_id;
-    const response = await repository.delete(user_id);
+    const requester_id = req.body.requester_id;
 
-    if (response === 1) {
-      return res.status(404).json({ error: "Failed to delete user" });
+    if (!requester_id) {
+      return res.status(400).json({ message: 'requester_id is missing', success: false });
+    }
+
+    const response = await repository.delete(requester_id);
+
+    if (!response) {
+      return res.status(404).json({ message: "Failed to delete user", success: false });
     } else {
-      return res.status(200).json({ message: "User deleted successfully" });
+      return res.status(200).json({ message: "User deleted successfully", success: false });
     }
   },
+  
 };
 
 export default UsersController;

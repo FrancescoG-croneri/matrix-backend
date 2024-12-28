@@ -10,11 +10,11 @@ export class WorkspacesRepository {
     try {
       if (!admin_id || !name) throw new Error('Missing details');
       const workspace_id = 'workspace' + generateUniqueId({ useLetters: false });
-      await this.db(this.table).insert({ workspace_id, admin_id, name, colors: {}, guests: {}, tests: {} });
+      await this.db(this.table).insert({ workspace_id, admin_id, name, colors: {}, guests: [], tests: [] });
       return await this.findOne(workspace_id); 
     } catch (e) {
       console.error(e);
-      return 1;
+      return false;
     }
   }
 

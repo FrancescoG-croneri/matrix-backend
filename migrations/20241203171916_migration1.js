@@ -3,14 +3,12 @@
  * @returns { Promise<void> }
  */
 export function up(knex) {
-  // We default the values that we want to change later instead of marking them as notNullable()
   return knex.schema.createTable('users', table => {
     table.increments('id').notNullable();
     table.string('user_id').notNullable();
     table.string('email').notNullable();
     table.string('password').notNullable();
     table.string('role').notNullable();
-    table.json('workspaces').defaultTo({});
     table.timestamps(true, true);
   }).then(() => {
     return knex.schema.createTable('workspaces', table => {
@@ -18,9 +16,7 @@ export function up(knex) {
       table.string('workspace_id').notNullable();
       table.string('name').notNullable();
       table.string('admin_id').notNullable();
-      table.json('guests').defaultTo({});
-      table.json('colors').defaultTo({});
-      table.json('tests').defaultTo({});
+      table.specificType('guest_ids', 'text[]').defaultTo('{}');
       table.timestamps(true, true);
   })}).then(() => {
     return knex.schema.createTable('tests', table => {
@@ -28,12 +24,38 @@ export function up(knex) {
       table.string('test_id').notNullable();
       table.string('admin_id').notNullable();
       table.string('workspace_id').notNullable();
-      table.json('subjects').defaultTo({});
-      table.json('guests').defaultTo({});
-      table.json('results').defaultTo({});
       table.timestamps(true, true);
     })
-  });
+  }).then(() => {
+    return knex.schema.createTable('invitations', table => {
+      table.increments('id').notNullable();
+      table.string('invitation_id').notNullable();
+      table.string('item_id').notNullable();
+      table.string('admin_id').notNullable();
+      table.string('guest_id').notNullable();
+      table.string('type').notNullable();
+      table.string('status').notNullable();
+      table.timestamps(true, true);
+    })
+  }).then(() => {
+    return knex.schema.createTable('colors', table => {
+      table.increments('id').notNullable();
+      table.string('color_id').notNullable();
+      table.string('workspace_id').notNullable();
+      table.string('guest_id').notNullable();
+      table.string('hex').notNullable();
+      table.timestamps(true, true);
+    })
+  }).then(() => {
+    return knex.schema.createTable('results', table => {
+      table.increments('id').notNullable();
+      table.string('result_id').notNullable();
+      table.string('test_id').notNullable();
+      table.string('guest_id').notNullable();
+      table.specificType('subjects', 'text[]').defaultTo('{}');
+      table.specificType('scores', 'text[]').defaultTo('{}');
+      table.timestamps(true, true);
+  })});
 };
 
 /**
@@ -41,7 +63,10 @@ export function up(knex) {
  * @returns { Promise<void> }
  */
 export function down(knex) {
-  return knex.schema.dropTable('users')
+  return knex.schema.dropTable('colors')
     .then(() => knex.schema.dropTable('workspaces'))
-    .then(() => knex.schema.dropTable('tests'));
+    .then(() => knex.schema.dropTable('tests'))
+    .then(() => knex.schema.dropTable('invitations'))
+    .then(() => knex.schema.dropTable('colors'))
+    .then(() => knex.schema.dropTable('results'));
 };

@@ -20,7 +20,7 @@ class TokenHandler {
     const authHeader = req.headers('Authorization');
   
     if (authHeader) token = authHeader.split(' ')[1];
-    if (token == null) return res.sendStatus(401)
+    if (!token) return res.sendStatus(401);
 
     return JWT.verify(token, secret, (error, payload) => {
       if (error) {

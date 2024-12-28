@@ -6,7 +6,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import userRouter from './routes/users.js';
 import workspaceRouter from './routes/workspaces.js';
-import testRouter from './routes/tests.js'
+import testRouter from './routes/tests.js';
 
 const app = express();
 

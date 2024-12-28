@@ -7,7 +7,6 @@ router.post('/create', WorkspacesController.Create);
 router.get('/find-all-by-admin', WorkspacesController.FindAllByAdmin);
 router.get('/find-one-by-id', WorkspacesController.FindOneById);
 
-router.get('/all', TokenHandler.validateToken, WorkspacesController.FindAll);
 router.put('/update', TokenHandler.validateToken, WorkspacesController.Update);
 router.delete('/delete', TokenHandler.validateToken, WorkspacesController.Delete);
 

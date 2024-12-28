@@ -24,14 +24,14 @@ const WorkspacesController = {
 
     const workspace = await repository.create(admin_id, name);
     
-    if (workspace === 1) {
-      return res.status(404).json({ message: 'Something went wrong with your workspace creation' });
+    if (!workspace) {
+      return res.status(404).json({ message: 'Something went wrong with your workspace creation', status: false });
     } else {
       const data = {
         token: TokenHandler.generateToken(admin_id),
         workspace: workspace[0]
       }
-      return res.status(201).json({ message: 'Workspace created successfully', data });
+      return res.status(201).json({ message: 'Workspace created successfully', data, status: true });
     }
   },
 
@@ -63,7 +63,7 @@ const WorkspacesController = {
 
     const workspace = await repository.findOneById(workspace_id);
 
-    if (workspace === 1 || !workspace.length) {
+    if (workspace === 1 || !workspace) {
       return res.status(404).json({ message: 'Failed to find workspace' });
     } else {
       const data = {
@@ -74,22 +74,22 @@ const WorkspacesController = {
     }
   },
 
-  FindAll: async (req, res) => {
-    const workspaces = await repository.findAll();
+  // FindAll: async (req, res) => {
+  //   const workspaces = await repository.findAll();
 
-    if (users === 1) {
-      return res.status(404).json({ message: 'Failed to find users' });
-    } else {
-      const modifiedUsers = users.map((user) => {
-        delete user.id;
-        delete user.password;
-        delete user.created_at;
-        delete user.updated_at;
-      });
-      const token = TokenHandler.generateToken(users);
-      return res.status(200).json({ message: "Users fetched correctly", users: modifiedUsers, token });
-    }
-  },
+  //   if (users === 1) {
+  //     return res.status(404).json({ message: 'Failed to find users' });
+  //   } else {
+  //     const modifiedUsers = users.map((user) => {
+  //       delete user.id;
+  //       delete user.password;
+  //       delete user.created_at;
+  //       delete user.updated_at;
+  //     });
+  //     const token = TokenHandler.generateToken(users);
+  //     return res.status(200).json({ message: "Users fetched correctly", users: modifiedUsers, token });
+  //   }
+  // },
 
   FindAllByAdmin: async (req, res) => {
     const admin_id = req.query.admin_id;
@@ -153,7 +153,7 @@ const WorkspacesController = {
       return res.status(404).json({ message: "Failed to update user" });
     } else {
       const token = TokenHandler.generateToken(response.user);
-      return res.status(200).json({ message: response.message, user: response.user, token });
+      return res.status(200).json({ message: response.message, user: response.workspace, token });
     }
   },
 
