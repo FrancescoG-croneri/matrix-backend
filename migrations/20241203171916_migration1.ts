@@ -1,8 +1,6 @@
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
-export function up(knex) {
+import { type Knex } from 'knex';
+
+export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('users', table => {
     table.increments('id').notNullable();
     table.string('user_id').notNullable();
@@ -17,6 +15,7 @@ export function up(knex) {
       table.string('name').notNullable();
       table.string('admin_id').notNullable();
       table.specificType('guest_ids', 'text[]').defaultTo('{}');
+      table.specificType('test_ids', 'text[]').defaultTo('{}');
       table.timestamps(true, true);
   })}).then(() => {
     return knex.schema.createTable('tests', table => {
@@ -24,6 +23,7 @@ export function up(knex) {
       table.string('test_id').notNullable();
       table.string('admin_id').notNullable();
       table.string('workspace_id').notNullable();
+      table.specificType('subjects', 'text[]').defaultTo('{}');
       table.timestamps(true, true);
     })
   }).then(() => {
@@ -58,11 +58,7 @@ export function up(knex) {
   })});
 };
 
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
-export function down(knex) {
+export async function down(knex: Knex): Promise<void> {
   return knex.schema.dropTable('colors')
     .then(() => knex.schema.dropTable('workspaces'))
     .then(() => knex.schema.dropTable('tests'))

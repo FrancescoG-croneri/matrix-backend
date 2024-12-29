@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "target": "ESNext",
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "outDir": "./dist",
+    "typeRoots": ["node_modules/@types"],
+    "lib": ["esnext"],
+    "types": ["node", "jest"],
+    "baseUrl": "./",
+    "paths": {
+      "@src/*": ["src/*"],
+      "@controllers/*": ["src/controllers/*"],
+      "@repositories/*": ["src/repositories/*"],
+      "@routes/*": ["src/routes/*"],
+      "@utils/*": ["src/utils/*"],
+      "@__tests__/unit/*": ["__tests__/unit/*"],
+      "@__tests__/integration/*": ["__tests__/integration/*"],
+    }
+  },
+  "include": [ 
+    "src/**/*.ts", 
+    "__tests__/**/*.ts",
+    "server.ts", 
+    "app.ts", 
+    "knexfile.ts", 
+    "migrations/**/*.ts", 
+    "seeds/**/*.ts", 
+    "jest.config.ts" 
+  ],
+  "exclude": [ 
+    "node_modules", 
+    ".env", 
+    ".gitignore", 
+    "./coverage", 
+    "./dist" 
+  ]
+}

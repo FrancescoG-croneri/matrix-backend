@@ -1,7 +1,7 @@
-import express from 'express';
-import UsersController from '../controllers/users.js';
-const router = express.Router();
-// import TokenHandler from '../utils/tokenHandler.js';
+import express, { type Router } from 'express';
+import UsersController from '../controllers/users';
+// import TokenHandler from '../utils/tokenHandler';
+const router: Router = express.Router();
 
 // POST
 router.post('/create', UsersController.Create);
