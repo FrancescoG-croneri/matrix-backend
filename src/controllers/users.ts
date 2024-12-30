@@ -1,20 +1,26 @@
+import { Request, Response } from 'express';
 import { type UsersRepositoryInterface } from '../types/UsersRepositoryInterface';
+import { type UsersControllerInterface } from '../types/UsersControllerInterface';
 import { type User } from '../types/User';
-import { UsersRepository } from '../repositories/UsersRepository';
-import TokenHandler from '../utils/tokenHandler';
+import { type TokenHandlerInterface } from '@src/types/TokenHandler';
 import bcrypt from 'bcrypt';
-import db from "../../db";
 
-const repository: UsersRepositoryInterface = new UsersRepository(db);
+class UsersController implements UsersControllerInterface {
 
-const UsersController = {
+  private repository: UsersRepositoryInterface;
+  private tokenHandler: TokenHandlerInterface;
 
-  Create: async (req: any, res: any) => {
+  constructor(repository: UsersRepositoryInterface, tokenHandler: TokenHandlerInterface) {
+    this.repository = repository;
+    this.tokenHandler = tokenHandler;
+  }
+
+  public async create(req: Request, res: Response) {
     const email: string = req.body.email;
     const password: string = req.body.password;
     const role: string = req.body.role;
 
-    if (!email || !password || !role || email.trim() === '' || password.trim() === '') {
+    if (!email || !password || !role || !email.trim() || !password.trim() || !role.trim()) {
       return res.status(400).json({ message: 'Password, Email or Role are missing', success: false });
     }
 
@@ -26,152 +32,153 @@ const UsersController = {
       return res.status(400).json({ message: 'Email invalid', success: false });
     }
 
-    const alreadyExistingUser: false | User[] = await repository.findOneByEmail(email);
+    const alreadyExistingUser: false | User[] = await this.repository.findOneByEmail(email);
 
     if (alreadyExistingUser) {
       return res.status(403).json({ message: 'This user already exists', success: false });
     }
 
     const hashedPassword: string = await bcrypt.hash(password, 10);
-    const response: false | User[] = await repository.create(email, hashedPassword, role);
+    const response: false | User[] = await this.repository.create(email, hashedPassword, role);
     
-    if (!response) {
+    if (!response || !response[0]) {
       return res.status(404).json({ message: 'Something went wrong during the user\'s creation', success: false });
     } else {
       const user: User = response[0];
-      const token: string = TokenHandler.generateToken(user.user_id);
+      const token: string | false = this.tokenHandler.generateToken(user.user_id);
 
       delete user.id;
       delete user.password;
       return res.status(201).json({ message: 'User created successfully', user, token, success: true });
     }
-  },
+  }
 
-  Authenticate: async (req: any, res: any) => {
+  public async authenticate(req: Request, res: Response) {
     const email: string = req.body.email;
     const password: string = req.body.password;
 
-    if (!email || !password || email.trim() === '' || password.trim() === '') {
+    if (!email || !password || !email.trim() || !password.trim()) {
       return res.status(400).json({ message: 'Email, Password are missing', success: false });
     }
 
-    const response: false | User[] = await repository.findOneByEmail(email);
+    const response: false | User[] = await this.repository.findOneByEmail(email);
     
-    if (!response) {
+    if (!response || !response[0]) {
       res.status(404).json({ message: 'Failed to find user', success: false });
     } else if (!(await bcrypt.compare(password, response[0].password))) {
       return res.status(401).json({ message: 'Passwords do not match', success: false });
     } else {
       const user: User = response[0];
-      const token: string = TokenHandler.generateToken(user.user_id);
+      const token: string | false = this.tokenHandler.generateToken(user.user_id);
 
       delete user.id;
       delete user.password;
       return res.status(201).json({ message: "Authentication successful", user, token, success: true });
     }
-  },
+  }
 
-  FindOneByEmail: async (req: any, res: any) => {
-    const requester_id: string = req.query.requester_id;
-    const email: string = req.query.email;
+  public async findOneByEmail(req: Request, res: Response) {
+    const requester_id: string = req.query.requester_id as string;
+    const email: string = req.query.email as string;
 
-    if (!email || !requester_id) return res.status(400).json({ message: 'Missing email', success: false });
+    if (!email || !requester_id || email.trim() === '' || requester_id.trim() === '') return res.status(400).json({ message: 'Missing requester_id or email', success: false });
 
-    const response: false | User[] = await repository.findOneByEmail(email);
+    const response: false | User[] = await this.repository.findOneByEmail(email);
 
-    if (!response) {
+    if (!response || !response[0]) {
       return res.status(404).json({ message: 'Failed to find user', success: false });
     } else {
       const user: User = response[0];
-      const token = TokenHandler.generateToken(requester_id);
+      const token: string | false = this.tokenHandler.generateToken(requester_id);
 
       delete user.id;
       delete user.password;
       return res.status(200).json({ message: "User found successfully", user, token, success: true });
     }
-  },
+  }
 
-  FindOneById: async (req: any, res: any) => {
-    const requester_id: string = req.query.requester_id;
-    const user_id: string = req.query.user_id;
+  public async findOneById(req: Request, res: Response) {
+    const requester_id: string = req.query.requester_id as string;
+    const user_id: string = req.query.user_id as string;
 
-    if (!user_id || !requester_id) return res.status(400).json({ message: 'Missing user_id', success: false });
+    if (!user_id || !requester_id || user_id.trim() === '' || requester_id.trim() === '') return res.status(400).json({ message: 'Missing user_id or requester_id', success: false });
 
-    const response: false | User[] = await repository.findOneById(user_id);
+    const response: false | User[] = await this.repository.findOneById(user_id);
 
-    if (!response) {
+    if (!response || !response[0]) {
       return res.status(404).json({ message: 'Failed to find user', success: false });
     } else {
       const user: User = response[0];
-      const token: string = TokenHandler.generateToken(requester_id);
+      const token: string | false = this.tokenHandler.generateToken(requester_id);
 
       delete user.id;
       delete user.password;
       return res.status(200).json({ message: "User found successfully", user, token, success: true });
     }
-  },
+  }
 
-  FindAll: async (req: any, res: any) => {
-    const requester_id: string = req.query.requester_id;
+  public async findAll(req: Request, res: Response) {
+    const requester_id: string = req.query.requester_id as string;
 
-    if (!requester_id) {
+    if (!requester_id || requester_id.trim() === '') {
       return res.status(400).json({ message: 'requester_id is missing', success: false });
     }
 
-    const response: false | User[] = await repository.findAll();
+    const response: false | User[] = await this.repository.findAll();
 
-    if (!response) {
+    if (!response || !response[0]) {
       return res.status(404).json({ message: 'Failed to find users', success: false });
     } else {
-      const modifiedUsers = response.map((user: User) => { // TODO: doublecheck what type this has to be
-        delete user.id;
-        delete user.password;
-      });
-      const token: string = TokenHandler.generateToken(requester_id);
+      for (let i = 0; i < response.length; i++) {
+        delete response[i].id;
+        delete response[i].password;
+      }
+      const token: string | false = this.tokenHandler.generateToken(requester_id);
 
-      return res.status(200).json({ message: "Users fetched correctly", users: modifiedUsers, token, success: true });
+      return res.status(200).json({ message: "Users fetched correctly", users: response, token, success: true });
     }
-  },
+  }
 
-  Update: async (req: any, res: any) => {
+  public async update(req: Request, res: Response) {
     const requester_id: string = req.body.requester_id;
+    const user_id: string = req.body.user_id;
     const email: string = req.body.email;
     const password: string = req.body.password;
     const role: string = req.body.role;
 
-    if (!requester_id) {
-      return res.status(400).json({ message: 'requester_id is missing', success: false });
+    if (!requester_id || !user_id || requester_id.trim() === '' || user_id.trim() === '') {
+      return res.status(400).json({ message: 'requester_id or user_id are missing', success: false });
     }
 
-    const response: false | User[] = await repository.update(requester_id, email, password, role);
+    const response: false | User[] = await this.repository.update(user_id, email, password, role);
 
-    if (!response) {
+    if (!response || !response[0]) {
       return res.status(404).json({ message: "Failed to update user", success: false });
     } else {
       const user: User = response[0];
-      const token: string = TokenHandler.generateToken(requester_id);
+      const token: string | false = this.tokenHandler.generateToken(requester_id);
 
       delete user.id;
       delete user.password;
       return res.status(200).json({ message: "User updated successfully", user, token, success: true });
     }
-  },
+  }
 
-  Delete: async (req: any, res: any) => {
-    const requester_id: string = req.body.requester_id;
+  public async delete(req: Request, res: Response) {
+    const user_id: string = req.body.user_id;
 
-    if (!requester_id) {
-      return res.status(400).json({ message: 'requester_id is missing', success: false });
+    if (!user_id || !user_id.trim()) {
+      return res.status(400).json({ message: 'user_id is missing', success: false });
     }
 
-    const response: boolean = await repository.delete(requester_id);
+    const response: boolean = await this.repository.delete(user_id);
 
     if (!response) {
       return res.status(404).json({ message: "Failed to delete user", success: false });
     } else {
       return res.status(200).json({ message: "User deleted successfully", success: true });
     }
-  },
+  }
   
 };
 

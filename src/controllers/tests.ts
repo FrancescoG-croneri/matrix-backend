@@ -3,7 +3,10 @@ import { type Test } from '@src/types/Test';
 import { TestsRepository } from '../repositories/TestsRepository';
 import TokenHandler from '../utils/tokenHandler';
 import db from "../../db";
+import { type TokenHandlerInterface } from '@src/types/TokenHandler';
+
 const repository: TestsRepositoryInterface = new TestsRepository(db);
+const tokenHandler: TokenHandlerInterface = new TokenHandler();
 
 const TestsController = {
 
@@ -30,7 +33,7 @@ const TestsController = {
     if (!test) {
       return res.status(404).json({ message: 'Something went wrong with your test creation', status: false });
     } else {
-      const token: string = TokenHandler.generateToken(requester_id);
+      const token: string | false = tokenHandler.generateToken(requester_id);
 
       return res.status(201).json({ message: 'Test created successfully', token, test: test[0], status: true });
     }
@@ -47,7 +50,7 @@ const TestsController = {
     if (!test) {
       return res.status(404).json({ message: 'Failed to find test', status: false });
     } else {
-      const token: string = TokenHandler.generateToken(requester_id);
+      const token: string | false = tokenHandler.generateToken(requester_id);
 
       return res.status(200).json({ message: "Test found successfully", token, test: test[0], status: true });
     }
@@ -61,7 +64,7 @@ const TestsController = {
     if (!tests) {
       return res.status(404).json({ message: 'Failed to find tests', status: false });
     } else {
-      const token: string = TokenHandler.generateToken(requester_id);
+      const token: string | false = tokenHandler.generateToken(requester_id);
 
       return res.status(200).json({ message: "Tests fetched correctly", token, tests, status: true });
     }
@@ -80,7 +83,7 @@ const TestsController = {
     if (!tests) {
       return res.status(404).json({ message: 'Failed to find tests', status: false });
     } else {
-      const token: string = TokenHandler.generateToken(requester_id);
+      const token: string | false = tokenHandler.generateToken(requester_id);
 
       return res.status(200).json({ message: "Tests fetched correctly", tests, token, status: true });
     }
@@ -102,7 +105,7 @@ const TestsController = {
     if (!test) {
       return res.status(404).json({ message: "Failed to update test", status: false });
     } else {
-      const token: string = TokenHandler.generateToken(requester_id);
+      const token: string | false = tokenHandler.generateToken(requester_id);
 
       return res.status(200).json({ message: 'Test updated successfully', test: test[0], token, status: true });
     }
@@ -121,7 +124,7 @@ const TestsController = {
     if (!response) {
       return res.status(404).json({ error: "Failed to delete test", status: false });
     } else {
-      const token: string = TokenHandler.generateToken(requester_id);
+      const token: string | false = tokenHandler.generateToken(requester_id);
 
       return res.status(200).json({ message: "Test deleted successfully", token, status: true });
     }

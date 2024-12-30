@@ -3,7 +3,10 @@ import { type Workspace } from '../types/Workspace';
 import { WorkspacesRepository } from '../repositories/WorkspacesRepository';
 import TokenHandler from '../utils/tokenHandler';
 import db from "../../db";
+import { type TokenHandlerInterface } from '@src/types/TokenHandler';
+
 const repository: WorkspacesRepositoryInterface = new WorkspacesRepository(db);
+const tokenHandler: TokenHandlerInterface = new TokenHandler();
 
 const WorkspacesController = {
 
@@ -30,7 +33,7 @@ const WorkspacesController = {
     if (!workspace) {
       return res.status(404).json({ message: 'Something went wrong with your workspace creation', status: false });
     } else {
-      const token: string = TokenHandler.generateToken(admin_id);
+      const token: string | false = tokenHandler.generateToken(admin_id);
       
       return res.status(201).json({ message: 'Workspace created successfully', token, workspace: workspace[0], status: true });
     }
@@ -47,7 +50,7 @@ const WorkspacesController = {
     if (!workspace) {
       return res.status(404).json({ message: 'Failed to find workspace', status: false });
     } else {
-      const token: string = TokenHandler.generateToken(requester_id);
+      const token: string | false = tokenHandler.generateToken(requester_id);
       return res.status(200).json({ message: "User found successfully", token, workspace: workspace[0], status: true });
     }
   },
@@ -63,7 +66,7 @@ const WorkspacesController = {
     if (!workspace) {
       return res.status(404).json({ message: 'Failed to find workspace', status: false });
     } else {
-      const token: string = TokenHandler.generateToken(requester_id);
+      const token: string | false = tokenHandler.generateToken(requester_id);
       return res.status(200).json({ message: "Workspace found successfully", token, workspace: workspace[0], status: true });
     }
   },
@@ -80,7 +83,7 @@ const WorkspacesController = {
     if (!workspaces) {
       return res.status(404).json({ message: 'Failed to find workspaces' });
     } else {
-      const token: string = TokenHandler.generateToken(requester_id);
+      const token: string | false = tokenHandler.generateToken(requester_id);
       return res.status(200).json({ message: "Workspaces fetched correctly", workspaces, token, status: true });
     }
   },
@@ -98,7 +101,7 @@ const WorkspacesController = {
     if (!workspaces) {
       return res.status(404).json({ message: 'Failed to find workspaces', status: false });
     } else {
-      const token: string = TokenHandler.generateToken(requester_id);
+      const token: string | false = tokenHandler.generateToken(requester_id);
       return res.status(200).json({ message: "Workspaces fetched correctly", workspaces, token, status: true });
     }
   },
@@ -120,7 +123,7 @@ const WorkspacesController = {
     if (!workspace) {
       return res.status(404).json({ message: "Failed to update workspace", status: false });
     } else {
-      const token: string = TokenHandler.generateToken(requester_id);
+      const token: string | false = tokenHandler.generateToken(requester_id);
       return res.status(200).json({ message: "Workspace updated successfully", workspace, token, status: true });
     }
   },
@@ -138,7 +141,7 @@ const WorkspacesController = {
     if (!response) {
       return res.status(404).json({ message: "Failed to delete workspace", status: false });
     } else {
-      const token: string = TokenHandler.generateToken(requester_id); 
+      const token: string | false = tokenHandler.generateToken(requester_id); 
       return res.status(200).json({ message: "Workspace deleted successfully", token, status: true });
     }
   },

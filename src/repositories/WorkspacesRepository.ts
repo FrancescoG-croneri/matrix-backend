@@ -75,8 +75,8 @@ export class WorkspacesRepository implements WorkspacesRepositoryInterface {
       // Update the individual fields
       if (admin_id) await this.db(this.table).where('workspace_id', workspace_id).update('admin_id', admin_id);
       if (name) await this.db(this.table).where('workspace_id', workspace_id).update('name', name); 
-      if (guest_ids) await this.db(this.table).where('workspace_id', workspace_id).update('guest_ids', guest_ids); 
-      if (test_ids) await this.db(this.table).where('workspace_id', workspace_id).update('test_ids', test_ids); 
+      if (guest_ids.length !== 0) await this.db(this.table).where('workspace_id', workspace_id).update('guest_ids', guest_ids); 
+      if (test_ids.length !== 0) await this.db(this.table).where('workspace_id', workspace_id).update('test_ids', test_ids); 
 
       return await this.findOneById(workspace_id);
     } catch (e) {

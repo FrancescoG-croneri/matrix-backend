@@ -1,15 +1,18 @@
 import express, { type Router } from 'express';
 import TestsController from '../controllers/tests';
 import TokenHandler from '../utils/tokenHandler';
+import { type TokenHandlerInterface } from '@src/types/TokenHandler';
+
+const tokenHandler: TokenHandlerInterface = new TokenHandler();
 const router: Router = express.Router();
 
 // POST
-router.post('/create', TokenHandler.validateToken, TestsController.Create);
+router.post('/create', tokenHandler.validateToken, TestsController.Create);
 
 // PUT
-router.put('/update', TokenHandler.validateToken, TestsController.Update);
+router.put('/update', tokenHandler.validateToken, TestsController.Update);
 
 // DELETE
-router.delete('/delete', TokenHandler.validateToken, TestsController.Delete);
+router.delete('/delete', tokenHandler.validateToken, TestsController.Delete);
 
 export default router;

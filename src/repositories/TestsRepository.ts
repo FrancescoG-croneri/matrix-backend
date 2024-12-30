@@ -75,7 +75,7 @@ export class TestsRepository implements TestsRepositoryInterface {
       // Update the individual fields
       if (admin_id) await this.db(this.table).where('test_id', test_id).update('admin_id', admin_id);
       if (workspace_id) await this.db(this.table).where('test_id', test_id).update('workspace_id', workspace_id);
-      if (subjects) await this.db(this.table).where('test_id', test_id).update('subjects', subjects);
+      if (subjects.length !== 0) await this.db(this.table).where('test_id', test_id).update('subjects', subjects);
       
       return await this.findOneById(test_id);
     } catch (e) {
