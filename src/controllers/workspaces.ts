@@ -1,150 +1,156 @@
-import { type WorkspacesRepositoryInterface } from '../types/WorkspacesRepositoryInterface';
-import { type Workspace } from '../types/Workspace';
-import { WorkspacesRepository } from '../repositories/WorkspacesRepository';
-import TokenHandler from '../utils/tokenHandler';
-import db from "../../db";
-import { type TokenHandlerInterface } from '@src/types/TokenHandler';
+import { type WorkspacesRepositoryInterface } from '@src/types/WorkspacesRepositoryInterface';
+import { type WorkspacesControllerInterface } from '@src/types/WorkspacesControllerInterface';
+import { type TokenHandlerInterface } from '@src/types/TokenHandlerInterface';
+import { type Workspace } from '@src/types/Workspace';
+import { type Request, type Response } from 'express';
 
-const repository: WorkspacesRepositoryInterface = new WorkspacesRepository(db);
-const tokenHandler: TokenHandlerInterface = new TokenHandler();
+class WorkspacesController implements WorkspacesControllerInterface {
 
-const WorkspacesController = {
+  private repository: WorkspacesRepositoryInterface;
+  private tokenHandler: TokenHandlerInterface;
 
-  Create: async (req: any, res: any) => {
+  constructor(repository: WorkspacesRepositoryInterface, tokenHandler: TokenHandlerInterface) {
+    this.repository = repository;
+    this.tokenHandler = tokenHandler;
+  }
+
+  public async create(req: Request, res: Response) {
     const admin_id: string = req.body.admin_id;
     const name: string = req.body.name;
 
-    if (!admin_id || !name || admin_id.trim() === '' || name.trim() === '') {
-      return res.status(400).json({ message: 'admin_id or Name are missing', status: false });
+    if (!admin_id || !name || !admin_id.trim() || !name.trim()) {
+      return res.status(400).json({ message: 'admin_id or Name are missing', success: false });
     }
 
     if (!admin_id.includes('admin')) {
-      return res.status(401).json({ message: 'Your role does not allow you to create workspaces', status: false });
+      return res.status(401).json({ message: 'Your role does not allow you to create workspaces', success: false });
     }
 
-    const alreadyExistingWorkspace: false | Workspace[] = await repository.findOneByName(name);
+    const alreadyExistingWorkspace: false | Workspace[] = await this.repository.findOneByName(name);
 
-    if (alreadyExistingWorkspace) {
-      return res.status(403).json({ message: 'A workspace with this name already exists', status: false });
+    if (alreadyExistingWorkspace && alreadyExistingWorkspace[0]) {
+      return res.status(403).json({ message: 'A workspace with this name already exists', success: false });
     }
 
-    const workspace: false | Workspace[] = await repository.create(admin_id, name);
+    const response: false | Workspace[] = await this.repository.create(admin_id, name);
     
-    if (!workspace) {
-      return res.status(404).json({ message: 'Something went wrong with your workspace creation', status: false });
+    if (!response || !response[0]) {
+      return res.status(404).json({ message: 'Something went wrong with your workspace creation', success: false });
     } else {
-      const token: string | false = tokenHandler.generateToken(admin_id);
+      const workspace: Workspace = response[0];
+      const token: string | false = this.tokenHandler.generateToken(admin_id);
       
-      return res.status(201).json({ message: 'Workspace created successfully', token, workspace: workspace[0], status: true });
+      return res.status(201).json({ message: 'Workspace created successfully', token, workspace, success: true });
     }
-  },
+  };
 
-  FindOneByName: async (req: any, res: any) => {
-    const requester_id: string = req.body.requester_id;
-    const name: string = req.body.email;
+  public async findOneByName(req: Request, res: Response) {
+    const requester_id: string = req.query.requester_id as string;
+    const name: string = req.query.name as string;
 
-    if (!name || !requester_id) return res.status(400).json({ message: 'requester_id or Name are missing', status: false });
+    if (!name || !requester_id || !name.trim() || !requester_id.trim()) return res.status(400).json({ message: 'requester_id or Name are missing', success: false });
 
-    const workspace: false | Workspace[] = await repository.findOneByName(name);
+    const response: false | Workspace[] = await this.repository.findOneByName(name);
 
-    if (!workspace) {
-      return res.status(404).json({ message: 'Failed to find workspace', status: false });
+    if (!response || !response[0]) {
+      return res.status(404).json({ message: 'Failed to find workspace', success: false });
     } else {
-      const token: string | false = tokenHandler.generateToken(requester_id);
-      return res.status(200).json({ message: "User found successfully", token, workspace: workspace[0], status: true });
+      const token: string | false = this.tokenHandler.generateToken(requester_id);
+      return res.status(200).json({ message: "Workspace found successfully", token, workspace: response[0], success: true });
     }
-  },
+  };
 
-  FindOneById: async (req: any, res: any) => {
-    const requester_id: string = req.query.requester_id;
-    const workspace_id: string = req.query.workspace_id;
+  public async findOneById(req: Request, res: Response) {
+    const requester_id: string = req.query.requester_id as string;
+    const workspace_id: string = req.query.workspace_id as string;
 
-    if (!workspace_id) return res.status(400).json({ message: "Missing workspace_id", status: false });
+    if (!workspace_id || !requester_id || !workspace_id.trim() || !requester_id.trim()) return res.status(400).json({ message: "Missing requester_id or workspace_id", success: false });
 
-    const workspace: false | Workspace[] = await repository.findOneById(workspace_id);
+    const response: false | Workspace[] = await this.repository.findOneById(workspace_id);
 
-    if (!workspace) {
-      return res.status(404).json({ message: 'Failed to find workspace', status: false });
+    if (!response || !response[0]) {
+      return res.status(404).json({ message: 'Failed to find workspace', success: false });
     } else {
-      const token: string | false = tokenHandler.generateToken(requester_id);
-      return res.status(200).json({ message: "Workspace found successfully", token, workspace: workspace[0], status: true });
+      const token: string | false = this.tokenHandler.generateToken(requester_id);
+      return res.status(200).json({ message: "Workspace found successfully", token, workspace: response[0], success: true });
     }
-  },
+  };
 
-  FindAll: async (req: any, res: any) => {
-    const requester_id: string = req.body.requester_id;
+  public async findAll(req: Request, res: Response) {
+    const requester_id: string = req.query.requester_id as string;
 
-    if (!requester_id) {
-      return res.status(400).json({ message: "Missing requester_id", status: false });
+    if (!requester_id || !requester_id.trim()) {
+      return res.status(400).json({ message: "Missing requester_id", success: false });
     }
 
-    const workspaces: false | Workspace[] = await repository.findAll();
+    const response: false | Workspace[] = await this.repository.findAll();
 
-    if (!workspaces) {
-      return res.status(404).json({ message: 'Failed to find workspaces' });
+    if (!response || !response[0]) {
+      return res.status(404).json({ message: 'Failed to find workspaces', success: false});
     } else {
-      const token: string | false = tokenHandler.generateToken(requester_id);
-      return res.status(200).json({ message: "Workspaces fetched correctly", workspaces, token, status: true });
+      const token: string | false = this.tokenHandler.generateToken(requester_id);
+      return res.status(200).json({ message: "Workspaces fetched correctly", workspaces: response, token, success: true });
     }
-  },
+  };
 
-  FindAllByAdmin: async (req: any, res: any) => {
-    const requester_id: string = req.query.requester_id;
-    const admin_id: string = req.query.admin_id;
+  public async findAllByAdmin(req: Request, res: Response) {
+    const requester_id: string = req.query.requester_id as string;
+    const admin_id: string = req.query.admin_id as string;
 
-    if (!admin_id || !requester_id) {
-      return res.status(400).json({ message: "Missing admin_id or requester_id", status: false });
+    if (!admin_id || !requester_id || !admin_id.trim() || !requester_id.trim()) {
+      return res.status(400).json({ message: "Missing admin_id or requester_id", success: false });
     }
 
-    const workspaces: false | Workspace[] = await repository.findAllByAdmin(admin_id);
+    const response: false | Workspace[] = await this.repository.findAllByAdmin(admin_id);
 
-    if (!workspaces) {
-      return res.status(404).json({ message: 'Failed to find workspaces', status: false });
+    if (!response || !response[0]) {
+      return res.status(404).json({ message: 'Failed to find workspaces', success: false });
     } else {
-      const token: string | false = tokenHandler.generateToken(requester_id);
-      return res.status(200).json({ message: "Workspaces fetched correctly", workspaces, token, status: true });
+      const token: string | false = this.tokenHandler.generateToken(requester_id);
+      return res.status(200).json({ message: "Workspaces fetched correctly", workspaces: response, token, success: true });
     }
-  },
+  };
 
-  Update: async (req: any, res: any) => {
+  public async update(req: Request, res: Response) {
     const requester_id: string = req.body.requester_id;
     const workspace_id: string = req.body.workspace_id;
-    const name: string = req.body.name;
     const admin_id: string = req.body.admin_id;
+    const name: string = req.body.name;
     const guest_ids: string[] = req.body.guest_ids;
     const test_ids: string[] = req.body.test_ids;
 
-    if (!requester_id || !workspace_id) {
-      return res.status(400).json({ message: 'requester_id or workspace_id are missing', status: false });
+    if (!requester_id || !workspace_id || !requester_id.trim() || !workspace_id.trim()) {
+      return res.status(400).json({ message: 'requester_id or workspace_id are missing', success: false });
     }
 
-    const workspace: false | Workspace[] = await repository.update(workspace_id, admin_id, name, guest_ids, test_ids);
+    const response: false | Workspace[] = await this.repository.update(workspace_id, admin_id, name, guest_ids, test_ids);
 
-    if (!workspace) {
-      return res.status(404).json({ message: "Failed to update workspace", status: false });
+    if (!response || !response[0]) {
+      return res.status(404).json({ message: "Failed to update workspace", success: false });
     } else {
-      const token: string | false = tokenHandler.generateToken(requester_id);
-      return res.status(200).json({ message: "Workspace updated successfully", workspace, token, status: true });
+      const token: string | false = this.tokenHandler.generateToken(requester_id);
+      return res.status(200).json({ message: "Workspace updated successfully", workspace: response[0], token, success: true });
     }
-  },
+  };
 
-  Delete: async (req: any, res: any) => {
+  public async delete(req: Request, res: Response) {
     const requester_id: string = req.body.requester_id;
     const workspace_id: string = req.body.workspace_id;
 
-    if (!requester_id || !workspace_id) {
-      return res.status(400).json({ message: 'requester_id or workspace_id are missing', status: false });
+    if (!requester_id || !workspace_id || !requester_id.trim() || !workspace_id.trim()) {
+      return res.status(400).json({ message: 'requester_id or workspace_id are missing', success: false });
     }
 
-    const response: boolean = await repository.delete(workspace_id);
+    const response: boolean = await this.repository.delete(workspace_id);
 
     if (!response) {
-      return res.status(404).json({ message: "Failed to delete workspace", status: false });
+      return res.status(404).json({ message: "Failed to delete workspace", success: false });
     } else {
-      const token: string | false = tokenHandler.generateToken(requester_id); 
-      return res.status(200).json({ message: "Workspace deleted successfully", token, status: true });
+      const token: string | false = this.tokenHandler.generateToken(requester_id); 
+      return res.status(200).json({ message: "Workspace deleted successfully", token, success: true });
     }
-  },
+  };
+
 };
 
 export default WorkspacesController;

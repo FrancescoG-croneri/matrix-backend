@@ -1,19 +1,30 @@
 import express, { type Router } from 'express';
+import { type WorkspacesRepositoryInterface } from '@src/types/WorkspacesRepositoryInterface';
+import { type WorkspacesControllerInterface } from '@src/types/WorkspacesControllerInterface';
+import { type TokenHandlerInterface } from '@src/types/TokenHandlerInterface';
+import { WorkspacesRepository } from '@src/repositories/WorkspacesRepository';
 import WorkspacesController from '../controllers/workspaces';
 import TokenHandler from '../utils/tokenHandler';
+import db from '../../db';
+
+const repository: WorkspacesRepositoryInterface = new WorkspacesRepository(db);
+const tokenHandler: TokenHandlerInterface = new TokenHandler();
+const workspacesController: WorkspacesControllerInterface = new WorkspacesController(repository, tokenHandler);
 const router: Router = express.Router();
 
 // POST
-router.post('/create', WorkspacesController.Create);
+router.post('/create', tokenHandler.validateToken, workspacesController.create);
 
 // GET
-router.get('/oneById', WorkspacesController.FindOneById);
-router.get('/allByAdmin', WorkspacesController.FindAllByAdmin);
+router.get('/oneByName', tokenHandler.validateToken, workspacesController.findOneByName);
+router.get('/oneById', tokenHandler.validateToken, workspacesController.findOneById);
+router.get('/all', tokenHandler.validateToken, workspacesController.findAll);
+router.get('/allByAdmin', tokenHandler.validateToken, workspacesController.findAllByAdmin);
 
 // PUT
-router.put('/update', TokenHandler.validateToken, WorkspacesController.Update);
+router.put('/update', tokenHandler.validateToken, workspacesController.update);
 
 // DELETE
-router.delete('/delete', TokenHandler.validateToken, WorkspacesController.Delete);
+router.delete('/delete', tokenHandler.validateToken, workspacesController.delete);
 
 export default router;

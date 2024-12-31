@@ -1,4 +1,4 @@
-import { type TokenHandlerInterface } from "@src/types/TokenHandler";
+import { type TokenHandlerInterface } from "@src/types/TokenHandlerInterface";
 import { type Request, type Response, type NextFunction } from "express";
 import JWT from "jsonwebtoken";
 import TokenHandler from "@src/utils/tokenHandler";

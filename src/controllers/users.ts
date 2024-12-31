@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
-import { type UsersRepositoryInterface } from '../types/UsersRepositoryInterface';
-import { type UsersControllerInterface } from '../types/UsersControllerInterface';
-import { type User } from '../types/User';
-import { type TokenHandlerInterface } from '@src/types/TokenHandler';
+import { type TokenHandlerInterface } from '@src/types/TokenHandlerInterface';
+import { type UsersRepositoryInterface } from '@src/types/UsersRepositoryInterface';
+import { type UsersControllerInterface } from '@src/types/UsersControllerInterface';
+import { type User } from '@src/types/User';
+import { type Request, type Response } from 'express';
 import bcrypt from 'bcrypt';
 
 class UsersController implements UsersControllerInterface {
@@ -34,7 +34,7 @@ class UsersController implements UsersControllerInterface {
 
     const alreadyExistingUser: false | User[] = await this.repository.findOneByEmail(email);
 
-    if (alreadyExistingUser) {
+    if (alreadyExistingUser && alreadyExistingUser[0]) {
       return res.status(403).json({ message: 'This user already exists', success: false });
     }
 

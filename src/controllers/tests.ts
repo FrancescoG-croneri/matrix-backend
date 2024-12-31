@@ -1,134 +1,135 @@
 import { type TestsRepositoryInterface } from '@src/types/TestsRepositoryInterface';
+import { type TestsControllerInterface } from '@src/types/TestsControllerInterface';
+import { type TokenHandlerInterface } from '@src/types/TokenHandlerInterface';
 import { type Test } from '@src/types/Test';
-import { TestsRepository } from '../repositories/TestsRepository';
-import TokenHandler from '../utils/tokenHandler';
-import db from "../../db";
-import { type TokenHandlerInterface } from '@src/types/TokenHandler';
+import { type Request, type Response } from 'express';
 
-const repository: TestsRepositoryInterface = new TestsRepository(db);
-const tokenHandler: TokenHandlerInterface = new TokenHandler();
+class TestsController implements TestsControllerInterface {
 
-const TestsController = {
+  private repository: TestsRepositoryInterface;
+  private tokenHandler: TokenHandlerInterface;
 
-  Create: async (req: any, res: any) => {
+  constructor(repository: TestsRepositoryInterface, tokenHandler: TokenHandlerInterface) {
+    this.repository = repository;
+    this.tokenHandler = tokenHandler;
+  }
+
+  public async create(req: Request, res: Response) {
     const requester_id: string = req.body.requester_id;
     const admin_id: string = req.body.admin_id;
     const workspace_id: string = req.body.workspace_id;
     const subjects: string[] = req.body.subjects;
 
-    if (
-      !requester_id || 
-      !admin_id || 
-      !workspace_id ||
-      requester_id.trim() === '' || 
-      admin_id.trim() === '' || 
-      workspace_id.trim() === '' ||
-      subjects.length === 0
-    ) {
-      return res.status(400).json({ message: 'requester_id, admin_id, workspace_id or Subjects are missing', status: false });
+    if (!requester_id || !admin_id || !workspace_id || !requester_id.trim() || !admin_id.trim() || !workspace_id.trim() || !subjects.length) {
+      return res.status(400).json({ message: 'requester_id, admin_id, workspace_id or Subjects are missing', success: false });
     }
 
-    const test: false | Test[] = await repository.create(admin_id, workspace_id, subjects);
+    const response: false | Test[] = await this.repository.create(admin_id, workspace_id, subjects);
     
-    if (!test) {
-      return res.status(404).json({ message: 'Something went wrong with your test creation', status: false });
+    if (!response || !response[0]) {
+      return res.status(404).json({ message: 'Something went wrong with your test creation', success: false });
     } else {
-      const token: string | false = tokenHandler.generateToken(requester_id);
+      const test: Test = response[0];
+      const token: string | false = this.tokenHandler.generateToken(requester_id);
 
-      return res.status(201).json({ message: 'Test created successfully', token, test: test[0], status: true });
+      return res.status(201).json({ message: 'Test created successfully', test, token, success: true });
     }
-  },
+  };
 
-  FindOneById: async (req: any, res: any) => {
-    const requester_id: string = req.query.requester_id;
-    const test_id: string = req.query.test_id;
+  public async findOneById(req: Request, res: Response) {
+    const requester_id: string = req.query.requester_id as string;
+    const test_id: string = req.query.test_id as string;
 
-    if (!test_id) return res.status(400).json({ message: "Missing test_id", status: false });
+    if (!requester_id || !requester_id.trim() || !test_id || !test_id.trim()) return res.status(400).json({ message: "Missing requester_id or test_id", success: false });
 
-    const test: false | Test[] = await repository.findOneById(test_id);
+    const response: false | Test[] = await this.repository.findOneById(test_id);
 
-    if (!test) {
-      return res.status(404).json({ message: 'Failed to find test', status: false });
+    if (!response || !response[0]) {
+      return res.status(404).json({ message: 'Failed to find test', success: false });
     } else {
-      const token: string | false = tokenHandler.generateToken(requester_id);
+      const test: Test = response[0];
+      const token: string | false = this.tokenHandler.generateToken(requester_id);
 
-      return res.status(200).json({ message: "Test found successfully", token, test: test[0], status: true });
+      return res.status(200).json({ message: "Test found successfully", test, token, success: true });
     }
-  },
+  };
 
-  FindAll: async (req: any, res: any) => {
-    const requester_id: string = req.query.requester_id;
+  public async findAll(req: Request, res: Response) {
+    const requester_id: string = req.query.requester_id as string;
 
-    const tests: false | Test[] = await repository.findAll();
+    if (!requester_id || !requester_id.trim()) return res.status(400).json({ message: "Missing requester_id", success: false });
 
-    if (!tests) {
-      return res.status(404).json({ message: 'Failed to find tests', status: false });
+    const response: false | Test[] = await this.repository.findAll();
+
+    if (!response || !response[0]) {
+      return res.status(404).json({ message: 'Failed to find tests', success: false });
     } else {
-      const token: string | false = tokenHandler.generateToken(requester_id);
+      const token: string | false = this.tokenHandler.generateToken(requester_id);
 
-      return res.status(200).json({ message: "Tests fetched correctly", token, tests, status: true });
+      return res.status(200).json({ message: "Tests fetched correctly", tests: response, token, success: true });
     }
-  },
+  };
 
-  FindAllByAdmin: async (req: any, res: any) => {
-    const requester_id: string = req.query.requester_id;
-    const admin_id: string = req.query.admin_id;
+  public async findAllByAdmin(req: Request, res: Response) {
+    const requester_id: string = req.query.requester_id as string;
+    const admin_id: string = req.query.admin_id as string;
 
-    if (!admin_id || !requester_id) {
-      return res.status(400).json({ message: "Missing admin_id or requester_id", status: false });
+    if (!admin_id || !requester_id || !admin_id.trim() || !requester_id.trim()) {
+      return res.status(400).json({ message: "Missing admin_id or requester_id", success: false });
     }
 
-    const tests: false | Test[] = await repository.findAllByAdmin(admin_id);
+    const response: false | Test[] = await this.repository.findAllByAdmin(admin_id);
 
-    if (!tests) {
-      return res.status(404).json({ message: 'Failed to find tests', status: false });
+    if (!response || !response[0]) {
+      return res.status(404).json({ message: 'Failed to find tests', success: false });
     } else {
-      const token: string | false = tokenHandler.generateToken(requester_id);
+      const token: string | false = this.tokenHandler.generateToken(requester_id);
 
-      return res.status(200).json({ message: "Tests fetched correctly", tests, token, status: true });
+      return res.status(200).json({ message: "Tests fetched correctly", tests: response, token, success: true });
     }
-  },
+  };
 
-  Update: async (req: any, res: any) => {
+  public async update(req: Request, res: Response) {
     const requester_id: string = req.body.requester_id;
     const test_id: string = req.body.test_id;
     const admin_id: string = req.body.admin_id;
     const workspace_id: string = req.body.workspace_id;
     const subjects: string[] = req.body.subjects;
 
-    if (!requester_id || !test_id) {
-      return res.status(400).json({ message: 'requester_id or test_id are missing', status: false });
+    if (!requester_id || !test_id || !requester_id.trim() || !test_id.trim()) {
+      return res.status(400).json({ message: 'requester_id or test_id are missing', success: false });
     }
 
-    const test: false | Test[] = await repository.update(test_id, admin_id, workspace_id, subjects);
+    const response: false | Test[] = await this.repository.update(test_id, admin_id, workspace_id, subjects);
 
-    if (!test) {
-      return res.status(404).json({ message: "Failed to update test", status: false });
+    if (!response || !response[0]) {
+      return res.status(404).json({ message: "Failed to update test", success: false });
     } else {
-      const token: string | false = tokenHandler.generateToken(requester_id);
+      const test: Test = response[0];
+      const token: string | false = this.tokenHandler.generateToken(requester_id);
 
-      return res.status(200).json({ message: 'Test updated successfully', test: test[0], token, status: true });
+      return res.status(200).json({ message: 'Test updated successfully', test, token, success: true });
     }
-  },
+  };
 
-  Delete: async (req: any, res: any) => {
+  public async delete(req: Request, res: Response) {
     const requester_id: string = req.body.requester_id;
     const test_id: string = req.body.test_id;
 
-    if (!requester_id || !test_id) {
-      return res.status(400).json({ message: "requester_id or test_id are missing", status: false });
+    if (!requester_id || !test_id || !requester_id.trim() || !test_id.trim()) {
+      return res.status(400).json({ message: "requester_id or test_id are missing", success: false });
     }
 
-    const response: boolean = await repository.delete(test_id);
+    const response: boolean = await this.repository.delete(test_id);
 
     if (!response) {
-      return res.status(404).json({ error: "Failed to delete test", status: false });
+      return res.status(404).json({ message: "Failed to delete test", success: false });
     } else {
-      const token: string | false = tokenHandler.generateToken(requester_id);
+      const token: string | false = this.tokenHandler.generateToken(requester_id);
 
-      return res.status(200).json({ message: "Test deleted successfully", token, status: true });
+      return res.status(200).json({ message: "Test deleted successfully", token, success: true });
     }
-  },
+  };
 };
 
 export default TestsController;

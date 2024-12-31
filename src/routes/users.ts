@@ -1,7 +1,7 @@
 import express, { type Router } from 'express';
 import { UsersRepositoryInterface } from '@src/types/UsersRepositoryInterface';
 import { UsersControllerInterface } from '@src/types/UsersControllerInterface';
-import { TokenHandlerInterface } from '@src/types/TokenHandler';
+import { TokenHandlerInterface } from '@src/types/TokenHandlerInterface';
 import { UsersRepository } from '@src/repositories/UsersRepository';
 import UsersController from '../controllers/users';
 import TokenHandler from '@src/utils/tokenHandler';

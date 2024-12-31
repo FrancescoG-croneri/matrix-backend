@@ -5,12 +5,8 @@ import { type Request, type Response } from 'express';
 import { type UsersControllerInterface } from "@src/types/UsersControllerInterface";
 import { type User } from "@src/types/User";
 import TokenHandler from "@src/utils/tokenHandler";
-import { TokenHandlerInterface } from "@src/types/TokenHandler";
+import { TokenHandlerInterface } from "@src/types/TokenHandlerInterface";
 import bcrypt from 'bcrypt';
-
-jest.mock("@src/repositories/UsersRepository");
-jest.mock("@src/utils/tokenHandler");
-jest.mock("bcrypt");
 
 describe('UsersController', () => {
 

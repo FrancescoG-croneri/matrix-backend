@@ -1,7 +1,7 @@
 import JWT, { JwtPayload } from "jsonwebtoken";
 import dotenv from 'dotenv';
 import { type NextFunction, type Request, type Response } from "express";
-import { TokenHandlerInterface } from "@src/types/TokenHandler";
+import { TokenHandlerInterface } from "@src/types/TokenHandlerInterface";
 
 dotenv.config();
 const secret: string = process.env.ACCESS_JWT_TOKEN;
