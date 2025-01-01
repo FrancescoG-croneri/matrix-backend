@@ -1,4 +1,4 @@
-import { type Workspace } from "./Workspace";
+import { type Workspace } from "./workspaces/Workspace";
 
 export interface WorkspacesRepositoryInterface {
   table: string,

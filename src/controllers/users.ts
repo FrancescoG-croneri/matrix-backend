@@ -1,7 +1,7 @@
-import { type TokenHandlerInterface } from '@src/types/TokenHandlerInterface';
-import { type UsersRepositoryInterface } from '@src/types/UsersRepositoryInterface';
-import { type UsersControllerInterface } from '@src/types/UsersControllerInterface';
-import { type User } from '@src/types/User';
+import { type TokenHandlerInterface } from '@src/types/utils/TokenHandlerInterface';
+import { type UsersRepositoryInterface } from '@src/types/users/UsersRepositoryInterface';
+import { type UsersControllerInterface } from '@src/types/users/UsersControllerInterface';
+import { type User } from '@src/types/users/User';
 import { type Request, type Response } from 'express';
 import bcrypt from 'bcrypt';
 

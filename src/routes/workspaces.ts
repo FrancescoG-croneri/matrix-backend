@@ -1,7 +1,7 @@
 import express, { type Router } from 'express';
-import { type WorkspacesRepositoryInterface } from '@src/types/WorkspacesRepositoryInterface';
-import { type WorkspacesControllerInterface } from '@src/types/WorkspacesControllerInterface';
-import { type TokenHandlerInterface } from '@src/types/TokenHandlerInterface';
+import { type WorkspacesRepositoryInterface } from '@src/types/workspaces/WorkspacesRepositoryInterface';
+import { type WorkspacesControllerInterface } from '@src/types/workspaces/WorkspacesControllerInterface';
+import { type TokenHandlerInterface } from '@src/types/utils/TokenHandlerInterface';
 import { WorkspacesRepository } from '@src/repositories/WorkspacesRepository';
 import WorkspacesController from '../controllers/workspaces';
 import TokenHandler from '../utils/tokenHandler';

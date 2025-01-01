@@ -1,7 +1,7 @@
 import { UsersRepository } from "@src/repositories/UsersRepository";
 import { type Knex } from "knex";
 import generateUniqueId from "generate-unique-id";
-import { User } from "@src/types/User";
+import { User } from "@src/types/users/User";
 
 jest.mock('generate-unique-id', () => ({
   __esModule: true,
@@ -105,6 +105,15 @@ describe('UsersRepository', () => {
       expect(mockDb.select).toHaveBeenCalledTimes(1);
       expect(mockDb.from).toHaveBeenCalledTimes(1);
     });
+
+    test('should return false when it fails', async () => {
+      mockDb.select = jest.fn().mockResolvedValue(false);
+      const response: false | User[] = await repository.findAll();
+
+      expect(response).toBe(false);
+      expect(mockDb.select).toHaveBeenCalledTimes(1);
+      expect(mockDb.from).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe('update', () => {
@@ -114,7 +123,7 @@ describe('UsersRepository', () => {
       expect(response).toBe(false);
       expect(mockDb.update).toHaveBeenCalledTimes(0);
 
-      response = await repository.update('admin1234', '', '', '');
+      response = await repository.update('admin1234');
   
       expect(response).not.toBe(false);
       expect(mockDb.update).toHaveBeenCalledTimes(0);

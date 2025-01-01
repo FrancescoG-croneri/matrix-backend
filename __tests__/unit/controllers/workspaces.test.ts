@@ -2,10 +2,10 @@ import WorkspacesController from "@src/controllers/workspaces";
 import { WorkspacesRepository } from "@src/repositories/WorkspacesRepository";
 import { type Knex } from "knex";
 import { type Request, type Response } from 'express';
-import { type WorkspacesControllerInterface } from "@src/types/WorkspacesControllerInterface";
-import { type Workspace } from "@src/types/Workspace";
+import { type WorkspacesControllerInterface } from "@src/types/workspaces/WorkspacesControllerInterface";
+import { type Workspace } from "@src/types/workspaces/Workspace";
 import TokenHandler from "@src/utils/tokenHandler";
-import { TokenHandlerInterface } from "@src/types/TokenHandlerInterface";
+import { TokenHandlerInterface } from "@src/types/utils/TokenHandlerInterface";
 
 describe('WorkspacesController', () => {
   

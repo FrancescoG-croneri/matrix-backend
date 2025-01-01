@@ -2,10 +2,10 @@ import UsersController from "@src/controllers/users";
 import { UsersRepository } from "@src/repositories/UsersRepository";
 import { type Knex } from "knex";
 import { type Request, type Response } from 'express';
-import { type UsersControllerInterface } from "@src/types/UsersControllerInterface";
-import { type User } from "@src/types/User";
+import { type UsersControllerInterface } from "@src/types/users/UsersControllerInterface";
+import { type User } from "@src/types/users/User";
 import TokenHandler from "@src/utils/tokenHandler";
-import { TokenHandlerInterface } from "@src/types/TokenHandlerInterface";
+import { TokenHandlerInterface } from "@src/types/utils/TokenHandlerInterface";
 import bcrypt from 'bcrypt';
 
 describe('UsersController', () => {

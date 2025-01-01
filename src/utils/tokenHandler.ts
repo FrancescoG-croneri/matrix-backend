@@ -1,7 +1,7 @@
 import JWT, { JwtPayload } from "jsonwebtoken";
 import dotenv from 'dotenv';
 import { type NextFunction, type Request, type Response } from "express";
-import { TokenHandlerInterface } from "@src/types/TokenHandlerInterface";
+import { TokenHandlerInterface } from "@src/types/utils/TokenHandlerInterface";
 
 dotenv.config();
 const secret: string = process.env.ACCESS_JWT_TOKEN;
@@ -27,19 +27,19 @@ class TokenHandler implements TokenHandlerInterface {
   }
 
   validateToken(req: Request, res: Response, next: NextFunction) {
-    let token: string;
-    const authHeader: string | string[] = req.headers['Authorization'];
-  
-    if (typeof authHeader === 'string') token = authHeader.split(' ')[1];
-    if (typeof authHeader === 'object') token = authHeader[0].split(' ')[1];
-    if (!token) return res.status(401).json({ message: 'Token missing', status: false });
+    const authHeader = req.headers['authorization'] as string; 
+
+    if (!authHeader || !authHeader.startsWith('Bearer ') || authHeader.split(' ').length < 2) { 
+      return res.status(401).json({ message: 'Token missing', status: false }); 
+    } 
+    const token = authHeader.split(' ')[1];
 
     return JWT.verify(token, secret, (error: Error, payload: JwtPayload) => {
       if (error) {
         console.log(error);
         res.status(403).json({ message: "Token expired", status: false });
       } else {
-        if (req.method === 'get') {
+        if (req.method.toLowerCase() === 'get') {
           req.query.user_id = payload.user_id;
         } else {  
           req.body.user_id = payload.user_id; 

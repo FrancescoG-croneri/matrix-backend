@@ -1,5 +1,5 @@
 import { type Knex } from "knex";
-import { type User } from "./User";
+import { type User } from "./users/User";
 
 export interface UsersRepositoryInterface {
   table: string,

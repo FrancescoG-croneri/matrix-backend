@@ -1,7 +1,7 @@
 import { TestsRepository } from "@src/repositories/TestsRepository";
 import { type Knex } from "knex";
 import generateUniqueId from "generate-unique-id";
-import { type Test } from "@src/types/Test";
+import { type Test } from "@src/types/tests/Test";
 
 jest.mock('generate-unique-id', () => ({
   __esModule: true,
@@ -94,6 +94,15 @@ describe('TestsRepository', () => {
       expect(mockDb.select).toHaveBeenCalledTimes(1);
       expect(mockDb.from).toHaveBeenCalledTimes(1);
     });
+
+    test('should return false when it fails', async () => {
+      mockDb.select = jest.fn().mockResolvedValue(false);
+      const response: false | Test[] = await repository.findAll();
+
+      expect(response).toBe(false);
+      expect(mockDb.select).toHaveBeenCalledTimes(1);
+      expect(mockDb.from).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe('findAllByAdmin, findAllByWorkspace', () => {
@@ -137,7 +146,7 @@ describe('TestsRepository', () => {
       expect(response).toBe(false);
       expect(mockDb.update).toHaveBeenCalledTimes(0);
 
-      response = await repository.update('test1234', '', '', []);
+      response = await repository.update('test1234');
   
       expect(response).not.toBe(false);
       expect(mockDb.update).toHaveBeenCalledTimes(0);

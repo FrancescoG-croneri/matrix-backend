@@ -1,7 +1,7 @@
-import { type WorkspacesRepositoryInterface } from '@src/types/WorkspacesRepositoryInterface';
-import { type WorkspacesControllerInterface } from '@src/types/WorkspacesControllerInterface';
-import { type TokenHandlerInterface } from '@src/types/TokenHandlerInterface';
-import { type Workspace } from '@src/types/Workspace';
+import { type WorkspacesRepositoryInterface } from '@src/types/workspaces/WorkspacesRepositoryInterface';
+import { type WorkspacesControllerInterface } from '@src/types/workspaces/WorkspacesControllerInterface';
+import { type TokenHandlerInterface } from '@src/types/utils/TokenHandlerInterface';
+import { type Workspace } from '@src/types/workspaces/Workspace';
 import { type Request, type Response } from 'express';
 
 class WorkspacesController implements WorkspacesControllerInterface {

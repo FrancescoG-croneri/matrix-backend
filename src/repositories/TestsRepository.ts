@@ -1,6 +1,6 @@
 import generateUniqueId from 'generate-unique-id';
 import { type Knex } from 'knex';
-import { type TestsRepositoryInterface } from '../types/TestsRepositoryInterface';
+import { type TestsRepositoryInterface } from '../types/tests/TestsRepositoryInterface';
 
 export class TestsRepository implements TestsRepositoryInterface {
 

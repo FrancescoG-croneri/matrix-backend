@@ -17,7 +17,8 @@ export async function up(knex: Knex): Promise<void> {
       table.specificType('guest_ids', 'text[]').defaultTo('{}');
       table.specificType('test_ids', 'text[]').defaultTo('{}');
       table.timestamps(true, true);
-  })}).then(() => {
+    });
+  }).then(() => {
     return knex.schema.createTable('tests', table => {
       table.increments('id').primary();
       table.string('test_id').notNullable();
@@ -25,7 +26,7 @@ export async function up(knex: Knex): Promise<void> {
       table.string('workspace_id').notNullable();
       table.specificType('subjects', 'text[]').defaultTo('{}');
       table.timestamps(true, true);
-    })
+    });
   }).then(() => {
     return knex.schema.createTable('invitations', table => {
       table.increments('id').primary();
@@ -36,7 +37,7 @@ export async function up(knex: Knex): Promise<void> {
       table.string('type').notNullable();
       table.string('status').notNullable();
       table.timestamps(true, true);
-    })
+    });
   }).then(() => {
     return knex.schema.createTable('colors', table => {
       table.increments('id').primary();
@@ -45,7 +46,7 @@ export async function up(knex: Knex): Promise<void> {
       table.string('guest_id').notNullable();
       table.string('hex').notNullable();
       table.timestamps(true, true);
-    })
+    });
   }).then(() => {
     return knex.schema.createTable('results', table => {
       table.increments('id').primary();
@@ -55,7 +56,8 @@ export async function up(knex: Knex): Promise<void> {
       table.specificType('subjects', 'text[]').defaultTo('{}');
       table.specificType('scores', 'text[]').defaultTo('{}');
       table.timestamps(true, true);
-  })});
+    });
+  });
 };
 
 export async function down(knex: Knex): Promise<void> {

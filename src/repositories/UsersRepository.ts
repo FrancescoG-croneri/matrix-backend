@@ -1,6 +1,6 @@
 import generateUniqueId from 'generate-unique-id';
 import { type Knex } from 'knex';
-import { UsersRepositoryInterface } from '../types/UsersRepositoryInterface';
+import { UsersRepositoryInterface } from '../types/users/UsersRepositoryInterface';
 
 export class UsersRepository implements UsersRepositoryInterface {
   private db: Knex;

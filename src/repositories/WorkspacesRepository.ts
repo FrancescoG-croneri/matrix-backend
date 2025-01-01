@@ -1,6 +1,6 @@
 import generateUniqueId from 'generate-unique-id';
 import { type Knex } from 'knex';
-import { type WorkspacesRepositoryInterface } from '../types/WorkspacesRepositoryInterface';
+import { type WorkspacesRepositoryInterface } from '../types/workspaces/WorkspacesRepositoryInterface';
 
 export class WorkspacesRepository implements WorkspacesRepositoryInterface {
 

@@ -1,6 +1,6 @@
-import { type TokenHandlerInterface } from '@src/types/TokenHandlerInterface';
-import { type TestsRepositoryInterface } from '@src/types/TestsRepositoryInterface';
-import { type TestsControllerInterface } from '@src/types/TestsControllerInterface';
+import { type TokenHandlerInterface } from '@src/types/utils/TokenHandlerInterface';
+import { type TestsRepositoryInterface } from '@src/types/tests/TestsRepositoryInterface';
+import { type TestsControllerInterface } from '@src/types/tests/TestsControllerInterface';
 import express, { type Router } from 'express';
 import { TestsRepository } from '../repositories/TestsRepository';
 import TestsController from '../controllers/tests';

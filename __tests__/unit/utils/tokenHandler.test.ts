@@ -1,4 +1,4 @@
-import { type TokenHandlerInterface } from "@src/types/TokenHandlerInterface";
+import { type TokenHandlerInterface } from "@src/types/utils/TokenHandlerInterface";
 import { type Request, type Response, type NextFunction } from "express";
 import JWT from "jsonwebtoken";
 import TokenHandler from "@src/utils/tokenHandler";
@@ -20,6 +20,7 @@ describe('TokenHandler', () => {
   describe('generateToken', () => {
     test('should not generate a token', () => {
       spy = jest.spyOn(JWT, 'sign');
+
       const token: string | false = tokenHandler.generateToken('');
   
       expect(token).toBe(false);
@@ -29,6 +30,7 @@ describe('TokenHandler', () => {
   
     test('should generate a token', () => {
       spy = jest.spyOn(JWT, 'sign');
+
       const token: string | false = tokenHandler.generateToken('admin1234');
   
       expect(token).not.toBe(false);
@@ -59,7 +61,8 @@ describe('TokenHandler', () => {
     })
 
     test('should not validate the token if the token is missing', () => {
-      req.headers['authorization'] = 'Bearer ';
+      req.headers['Authorization'] = 'Bearer ';
+
       tokenHandler.validateToken(req as Request, res as Response, next);
   
       expect(res.status).toHaveBeenCalledWith(401);

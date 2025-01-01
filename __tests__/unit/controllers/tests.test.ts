@@ -2,10 +2,10 @@ import TestsController from "@src/controllers/tests";
 import { TestsRepository } from "@src/repositories/TestsRepository";
 import { type Knex } from "knex";
 import { type Request, type Response } from 'express';
-import { type TestsControllerInterface } from "@src/types/TestsControllerInterface";
-import { type Test } from "@src/types/Test";
+import { type TestsControllerInterface } from "@src/types/tests/TestsControllerInterface";
+import { type Test } from "@src/types/tests/Test";
 import TokenHandler from "@src/utils/tokenHandler";
-import { TokenHandlerInterface } from "@src/types/TokenHandlerInterface";
+import { TokenHandlerInterface } from "@src/types/utils/TokenHandlerInterface";
 
 describe('TestsController', () => {
   
