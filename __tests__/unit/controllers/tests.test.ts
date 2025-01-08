@@ -342,7 +342,7 @@ describe('TestsController', () => {
       expect(res.json).toHaveBeenCalledWith({ message: "Failed to delete test", success: false });
     });
 
-    test('should delete the user successfully if the response from the repository layer is truthy', async () => {
+    test('should delete the test successfully if the response from the repository layer is truthy', async () => {
       req.body = { requester_id: 'admin1234', test_id: 'test1234' };
       mockRepository.delete = jest.fn().mockResolvedValue(true);
       mockTokenHandler.generateToken = jest.fn().mockReturnValue('token1234');

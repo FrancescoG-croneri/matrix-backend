@@ -1,4 +1,4 @@
-import { type Test } from "./tests/Test";
+import { type Test } from "./Test";
 
 export interface TestsRepositoryInterface {
   table: string,

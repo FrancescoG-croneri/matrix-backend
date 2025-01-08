@@ -420,7 +420,7 @@ describe('WorkspacesController', () => {
       expect(res.json).toHaveBeenCalledWith({ message: "Failed to delete workspace", success: false });
     });
 
-    test('should delete the user successfully if the response from the repository layer is truthy', async () => {
+    test('should delete the workspace successfully if the response from the repository layer is truthy', async () => {
       req.body = { requester_id: 'admin1234', workspace_id: 'workspace1234' };
       mockRepository.delete = jest.fn().mockResolvedValue(true);
       mockTokenHandler.generateToken = jest.fn().mockReturnValue('token1234');
