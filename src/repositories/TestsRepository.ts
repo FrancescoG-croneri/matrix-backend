@@ -14,10 +14,10 @@ export class TestsRepository implements TestsRepositoryInterface {
 
   public async create(admin_id: string, workspace_id: string, subjects: string[]) {
     try {
-      if (!admin_id || !workspace_id || subjects.length === 0) throw new Error('Missing workspace_id');
+      if (!admin_id || !workspace_id || subjects.length === 0) throw new Error('Missing details');
 
       const test_id: string = 'test' + generateUniqueId({ useLetters: false });
-      await this.db(this.table).insert({ admin_id, workspace_id, subjects });
+      await this.db(this.table).insert({ test_id, admin_id, workspace_id, subjects });
       
       return await this.findOneById(test_id);
     } catch (e) {
