@@ -242,9 +242,8 @@ describe('TestsController', () => {
         requester_id: 'admin1234', 
         test_id: '   ', 
         admin_id: 'admin1234', 
-        name: 'MyWorkspace1', 
-        guest_ids: ['guest123'], 
-        test_ids: ['test123'] 
+        workspace_id: 'workspace1234',
+        subjects: ['PHP', 'javascript'],
       };
 
       testsController.update(req as Request, res as Response);
@@ -256,9 +255,8 @@ describe('TestsController', () => {
         requester_id: '   ', 
         test_id: 'test1234', 
         admin_id: 'admin1234', 
-        name: 'MyWorkspace1', 
-        guest_ids: ['guest123'], 
-        test_ids: ['test123'] 
+        workspace_id: 'workspace1234',
+        subjects: ['PHP', 'javascript'],
       };
 
       testsController.update(req as Request, res as Response);
@@ -272,9 +270,8 @@ describe('TestsController', () => {
         requester_id: 'admin1234', 
         test_id: 'test1234', 
         admin_id: 'admin1234', 
-        name: 'MyWorkspace1', 
-        guest_ids: ['guest123'], 
-        test_ids: ['test123'] 
+        workspace_id: 'workspace1234',
+        subjects: ['PHP', 'javascript'],
       };
       mockRepository.update = jest.fn().mockResolvedValue([]);
 
@@ -299,9 +296,8 @@ describe('TestsController', () => {
         requester_id: 'admin1234', 
         test_id: 'test1234', 
         admin_id: 'admin1234', 
-        name: 'MyWorkspace1', 
-        guest_ids: ['guest123', 'guest456'], 
-        test_ids: ['test123', 'test456'] 
+        workspace_id: 'workspace1234',
+        subjects: ['PHP', 'javascript'],
       };
       mockRepository.update = jest.fn().mockResolvedValue([mockTest]);
       mockTokenHandler.generateToken = jest.fn().mockReturnValue('token1234');
